@@ -164,3 +164,90 @@ kbd {
 #restart-btn:hover {
   background: #9bbdff;
 }
+
+/* ---- Skin selector ---- */
+.skin-select {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #22223a;
+  border: 1px solid #3a3a5a;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-family: 'Courier New', Courier, monospace;
+  color: #aaa;
+  cursor: pointer;
+  letter-spacing: 1px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.skin-select:focus {
+  outline: none;
+  border-color: #7aa2f7;
+}
+
+/* ---- Neon skin ---- */
+body.skin-neon {
+  background: #000;
+}
+
+body.skin-neon #board,
+body.skin-neon #next-canvas {
+  background: #000;
+  border-color: #111;
+  box-shadow: 0 0 30px rgba(0, 255, 245, 0.3);
+}
+
+body.skin-neon .game-title {
+  color: #00fff5;
+  text-shadow: 0 0 20px rgba(0, 255, 245, 0.7);
+}
+
+body.skin-neon .value {
+  color: #00fff5;
+}
+
+/* ---- Pastel skin ---- */
+body.skin-pastel {
+  background: #f8f0ff;
+  color: #555;
+}
+
+body.skin-pastel #board,
+body.skin-pastel #next-canvas {
+  background: #fafafa;
+  border-color: #ddd;
+}
+
+body.skin-pastel .game-title {
+  color: #ba68c8;
+  text-shadow: 0 0 20px rgba(186, 104, 200, 0.3);
+}
+
+body.skin-pastel .value {
+  color: #ba68c8;
+}
+
+body.skin-pastel .label {
+  color: #aaa;
+}
+
+/* ---- Pixel skin ---- */
+body.skin-pixel {
+  background: #0a0a1a;
+}
+
+body.skin-pixel #board,
+body.skin-pixel #next-canvas {
+  background: #0d0d1f;
+  border-color: #1a1a3a;
+  image-rendering: pixelated;
+}
+
+body.skin-pixel .game-title {
+  color: #ffc400;
+  text-shadow: 0 0 10px rgba(255, 196, 0, 0.5);
+  letter-spacing: 8px;
+}

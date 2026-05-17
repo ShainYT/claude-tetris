@@ -4,16 +4,92 @@ const COLS = 10;
 const ROWS = 20;
 const BLOCK = 30;
 
-const COLORS = [
-  null,
-  '#4dd0e1', // I - cyan
-  '#ffd54f', // O - yellow
-  '#ba68c8', // T - purple
-  '#81c784', // S - green
-  '#e57373', // Z - red
-  '#7986cb', // J - indigo
-  '#ffb74d', // L - orange
-];
+const SKINS = {
+  retro: {
+    colors: [null, '#4dd0e1','#ffd54f','#ba68c8','#81c784','#e57373','#90caf9','#ffb74d','#9e9e9e'],
+    drawBlock(ctx, x, y, colorIndex, size, alpha) {
+      if (!colorIndex) return;
+      const color = this.colors[colorIndex];
+      ctx.globalAlpha = alpha ?? 1;
+      ctx.fillStyle = color;
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+      ctx.globalAlpha = 1;
+    }
+  },
+  neon: {
+    colors: [null, '#00fff5','#ffe600','#e040fb','#00e676','#ff1744','#448aff','#ff9100','#b0bec5'],
+    drawBlock(ctx, x, y, colorIndex, size, alpha) {
+      if (!colorIndex) return;
+      const color = this.colors[colorIndex];
+      ctx.globalAlpha = alpha ?? 1;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = color;
+      ctx.fillStyle = color;
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+  },
+  pastel: {
+    colors: [null, '#b2ebf2','#fff9c4','#e1bee7','#c8e6c9','#ffcdd2','#bbdefb','#ffe0b2','#eeeeee'],
+    drawBlock(ctx, x, y, colorIndex, size, alpha) {
+      if (!colorIndex) return;
+      const color = this.colors[colorIndex];
+      ctx.globalAlpha = alpha ?? 1;
+      ctx.fillStyle = color;
+      const bx = x * size + 1;
+      const by = y * size + 1;
+      const bw = size - 2;
+      const bh = size - 2;
+      const r = 6;
+      const hasRoundRect = !!ctx.roundRect;
+      if (hasRoundRect) {
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, r);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, 4, [r, r, 0, 0]);
+        ctx.fill();
+      } else {
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.fillRect(bx, by, bw, 4);
+      }
+      ctx.globalAlpha = 1;
+    }
+  },
+  pixel: {
+    colors: [null, '#00b8d9','#ffc400','#6554c0','#36b37e','#de350b','#0052cc','#ff8b00','#6b778c'],
+    drawBlock(ctx, x, y, colorIndex, size, alpha) {
+      if (!colorIndex) return;
+      const color = this.colors[colorIndex];
+      ctx.globalAlpha = alpha ?? 1;
+      ctx.fillStyle = color;
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+      const px = 4;
+      const cells = Math.floor((size - 2) / px);
+      const shade = colorIndex % 2 === 0 ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.2)';
+      ctx.fillStyle = shade;
+      for (let pr = 0; pr < cells; pr++) {
+        for (let pc = 0; pc < cells; pc++) {
+          if ((pr + pc + colorIndex) % 3 === 0) {
+            ctx.fillRect(x * size + 1 + pc * px, y * size + 1 + pr * px, px - 1, px - 1);
+          }
+        }
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, 2);
+      ctx.globalAlpha = 1;
+    }
+  }
+};
+
+let currentSkin = SKINS.retro;
 
 const PIECES = [
   null,
@@ -156,18 +232,6 @@ function updateHUD() {
   levelEl.textContent = level;
 }
 
-function drawBlock(context, x, y, colorIndex, size, alpha) {
-  if (!colorIndex) return;
-  const color = COLORS[colorIndex];
-  context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
-  context.globalAlpha = 1;
-}
-
 function drawGrid() {
   ctx.strokeStyle = '#22222e';
   ctx.lineWidth = 0.5;
@@ -189,22 +253,19 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawGrid();
 
-  // board
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      drawBlock(ctx, c, r, board[r][c], BLOCK);
+      currentSkin.drawBlock(ctx, c, r, board[r][c], BLOCK);
 
-  // ghost
   const gy = ghostY();
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
       if (current.shape[r][c])
-        drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
+        currentSkin.drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
 
-  // current piece
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
-      drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
+      currentSkin.drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
 }
 
 function drawNext() {
@@ -215,7 +276,7 @@ function drawNext() {
   const offY = Math.floor((4 - shape.length) / 2);
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
-      drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
+      currentSkin.drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
 
 function endGame() {
@@ -274,6 +335,14 @@ function init() {
   animId = requestAnimationFrame(loop);
 }
 
+function applySkin(name) {
+  currentSkin = SKINS[name] || SKINS.retro;
+  document.body.className = document.body.className.replace(/skin-\S+/g, '').trim();
+  document.body.classList.add('skin-' + name);
+  localStorage.setItem('tetris-skin', name);
+  if (!gameOver && !paused) draw();
+}
+
 document.addEventListener('keydown', e => {
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
@@ -302,3 +371,9 @@ document.addEventListener('keydown', e => {
 restartBtn.addEventListener('click', init);
 
 init();
+
+const savedSkin = localStorage.getItem('tetris-skin') || 'retro';
+document.getElementById('skin-select').value = savedSkin;
+applySkin(savedSkin);
+
+document.getElementById('skin-select').addEventListener('change', e => applySkin(e.target.value));
